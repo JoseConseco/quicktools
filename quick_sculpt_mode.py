@@ -17,7 +17,7 @@ pose = 'POSE'
 class QUICKT_MT_QuickSculptTools(bpy.types.Menu):
 
     bl_label = "Quick Sculpt Tools"
-    bl_idname = "sculpt.tools_menu"
+    bl_idname = "QUICKT_MT_QuickSculptTools"
 
     def draw(self, context):
         toolsettings = context.tool_settings
@@ -28,7 +28,7 @@ class QUICKT_MT_QuickSculptTools(bpy.types.Menu):
             capabilities = brush.sculpt_capabilities
 
             # bpy.context.tool_settings.sculpt.brush=bpy.data.brushes['Nudge']
-            layout.menu(BrushesMenu.bl_idname, "Brush",icon_value=layout.icon(brush))
+            layout.menu(QUICKT_MT_BrushesMenu.bl_idname, "Brush", icon_value=layout.icon(brush))
             if capabilities.has_plane_offset:
                 layout.prop(brush, "plane_offset", slider=True)
             if context.sculpt_object.use_dynamic_topology_sculpting:
@@ -58,7 +58,7 @@ class QUICKT_MT_QuickSculptTools(bpy.types.Menu):
 
 class QUICKT_MT_BrushesMenu(bpy.types.Menu):
     bl_label = "Brush"
-    bl_idname = "sculpt.brushes_menu"
+    bl_idname = "QUICKT_MT_BrushesMenu"
 
     def draw(self, context):
         layout = self.layout

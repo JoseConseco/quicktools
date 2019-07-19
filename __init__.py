@@ -14,6 +14,7 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(quick_object)
+    importlib.reload(quick_select)
     importlib.reload(quick_shapekeys)
     importlib.reload(quick_focus)
     importlib.reload(quick_armature)
@@ -21,6 +22,7 @@ if "bpy" in locals():
     importlib.reload(radial_instances)
 else:
     from . import quick_object
+    from . import quick_select
     from . import quick_shapekeys
     from . import quick_focus
     from . import quick_armature
@@ -36,6 +38,7 @@ from . import auto_load
 
 auto_load.init()
 
+from .quick_focus import HistoryEpochCollection
 import traceback
 
 addon_keymaps = []
@@ -52,11 +55,11 @@ def register():
     kmi1.properties.hide_selected = False
     addon_keymaps.append((km, kmi1))
 
-    kmi2 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS', ctrl=True)
+    kmi2 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS', alt=True)
     kmi2.properties.hide_selected = True
     addon_keymaps.append((km, kmi2))
 
-    bpy.types.Scene.quick_focus_history = bpy.props.CollectionProperty(type=quick_focus.HistoryEpochCollection)
+    bpy.types.Scene.quick_focus_history = bpy.props.CollectionProperty(type=HistoryEpochCollection)
 
 def unregister():
     try:

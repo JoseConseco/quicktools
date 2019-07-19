@@ -29,30 +29,44 @@ def get_scale_mat(vec_scale):
     return mat_scale
 
 
-def set_lattice_transformation(selected_objs):
+def set_lattice_transformation(selected_objs, use_modifiers):
     ''' return (center, sizex, sizey, sizez) '''
     patter_count = len(selected_objs)
     mode = bpy.context.active_object.mode
     bpy.ops.object.mode_set(mode='OBJECT')
     if patter_count == 1:  # get local space cos we will align lattice to it anyway
-        points = [vert.co for vert in selected_objs[0].data.vertices] if mode == 'OBJECT' else  [vert.co for vert in selected_objs[0].data.vertices if vert.select] 
+        if use_modifiers:
+            obj_data = selected_objs[0].to_mesh(bpy.context.depsgraph, apply_modifiers=True, calc_undeformed=False)
+        else:
+            obj_data = selected_objs[0].data
+        if mode == 'OBJECT':
+            points = [vert.co for vert in obj_data.vertices]
+        else:
+            points = [vert.co for vert in obj_data.vertices if vert.select] 
         if mode == 'EDIT' and len(points)>0:
-            if 'QuickLatticeMask' in selected_objs[0].vertex_groups.keys():
-                vg = selected_objs[0].vertex_groups["QuickLatticeMask"]
+            if 'QuickLatticeMask' in obj_data.vertex_groups.keys():
+                vg = obj_data.vertex_groups["QuickLatticeMask"]
             else:
-                vg = selected_objs[0].vertex_groups.new(name="QuickLatticeMask")
-            vg.add([vert.index for vert in selected_objs[0].data.vertices if vert.select] , 1, "ADD")
+                vg = obj_data.vertex_groups.new(name="QuickLatticeMask")
+            vg.add([vert.index for vert in obj_data.vertices if vert.select] , 1, "ADD")
     else:
         points = []
         for obj in selected_objs:
-            verts_co = [obj.matrix_world@vert.co for vert in obj.data.vertices] if mode == 'OBJECT' else [obj.matrix_world@vert.co for vert in obj.data.vertices if vert.select]
+            if use_modifiers:
+                obj_data = obj.to_mesh(bpy.context.depsgraph, apply_modifiers=True, calc_undeformed=False)
+            else:
+                obj_data = obj.data
+            if mode == 'OBJECT':
+                verts_co = [obj.matrix_world@vert.co for vert in obj_data.vertices]  
+            else:
+                verts_co = [obj.matrix_world@vert.co for vert in obj_data.vertices if vert.select]
             points.extend(verts_co)
             if mode == 'EDIT' and len(verts_co)>0:
                 if 'QuickLatticeMask' in obj.vertex_groups.keys():
                     vg = obj.vertex_groups["QuickLatticeMask"]
                 else:
                     vg = obj.vertex_groups.new(name="QuickLatticeMask")
-                vg.add([vert.index for vert in obj.data.vertices if vert.select] , 1, "ADD")
+                vg.add([vert.index for vert in obj_data.vertices if vert.select] , 1, "ADD")
 
     np_points = np.array(points)
     max_x = np.max(np_points[:, 0])
@@ -77,7 +91,7 @@ def set_lattice_transformation(selected_objs):
     return out_mat
 
 
-def set_lattice(context, name, target_objs):
+def set_lattice(context, name, target_objs, use_modifiers):
     lattice = bpy.data.lattices.new(name)
     lattice.points_u = 2
     lattice.points_v = 2
@@ -86,21 +100,29 @@ def set_lattice(context, name, target_objs):
     context.scene.collection.objects.link(lattice_ob)
 
     # lattice_ob.rotation_euler = align_obj.rotation_euler
-    new_mat_transform = set_lattice_transformation(target_objs)
+    new_mat_transform = set_lattice_transformation(target_objs, use_modifiers)
     lattice_ob.matrix_world = new_mat_transform
     return lattice_ob
 
 
-def setup_modifiers(context, mod_name):
+def setup_modifiers(context, mod_name, use_modifiers):
     mode = context.active_object.mode
     selected_objects = [obj for obj in context.selected_objects]
-    mod_target_obj = set_lattice(context, name=mod_name, target_objs=selected_objects)
+    mod_target_obj = set_lattice(context, mod_name, selected_objects, use_modifiers)
     for obj in selected_objects:
+        mod_count = len(obj.modifiers)
         lat_modifier = obj.modifiers.new(name=mod_name, type='LATTICE')
+        if not use_modifiers:
+            for i in range(mod_count):
+                bpy.ops.object.modifier_move_up(modifier=lat_modifier.name)
+
         lat_modifier.object = mod_target_obj
         if mode == 'EDIT':
             lat_modifier.vertex_group = 'QuickLatticeMask'
+    bpy.ops.object.select_all(action='DESELECT')
+
     context.view_layer.objects.active = mod_target_obj
+    mod_target_obj.select_set(True)
     return
 
 
@@ -109,32 +131,24 @@ class QUICKT_OT_QuickLattice(bpy.types.Operator):
     bl_label = "Quick Lattice"
     bl_options = {"REGISTER", "UNDO"}
 
+    use_modifiers: bpy.props.BoolProperty(name='use_modifiers', default=False)
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
 
     def execute(self, context):
-        setup_modifiers(context, 'Quick_Lattice')
+        if context.active_object == 'LATTICE':
+            self.apply_lat(context, context.active_object)
+        setup_modifiers(context, 'Quick_Lattice', self.use_modifiers)
         return {'FINISHED'}
 
-class QUICKT_OT_QuickLatticeApply(bpy.types.Operator):
-    bl_idname = "object.quick_lattice_apply"
-    bl_label = "Quick Lattice Apply"
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        return context.active_object is not None
-
-    def execute(self, context):
-        lattice = context.active_object
-        if lattice.type != 'LATTICE':
-            return {'CANCELLED'}
+    def apply_lat(self, context, lat_obj):
         backup_active_obj = context.view_layer.objects.active
         for obj in context.view_layer.objects:
             if 'Quick_Lattice' in obj.modifiers.keys():
                 context.view_layer.objects.active = obj
-                bpy.ops.object.modifier_apply(modifier="Quick_Lattice")
+                if obj.modifiers['Quick_Lattice'].object and obj.modifiers['Quick_Lattice'].object == lat_obj:
+                    bpy.ops.object.modifier_apply(modifier="Quick_Lattice")
                 if "QuickLatticeMask" in obj.vertex_groups.keys():
                     obj.vertex_groups.remove(obj.vertex_groups["QuickLatticeMask"])
         context.view_layer.objects.active = backup_active_obj

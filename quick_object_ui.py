@@ -3,7 +3,7 @@ import bpy
 
 class QUICKT_MT_QuickObjectTools(bpy.types.Menu):
     bl_label = "Quick Object Tools"
-    bl_idname = "object.tools_menu"
+    bl_idname = "QUICKT_MT_QuickObjectTools"
 
     def draw(self, context):
         layout = self.layout
@@ -34,7 +34,7 @@ class QUICKT_MT_QuickObjectTools(bpy.types.Menu):
 
 
 class QUICKT_MT_SetShapeKeys(bpy.types.Menu):
-    bl_idname = "object.quick_shapekeys"
+    bl_idname = "QUICKT_MT_SetShapeKeys"
     bl_label = "Quick Shape Keys"
 
     def draw(self, context):
@@ -46,7 +46,7 @@ class QUICKT_MT_SetShapeKeys(bpy.types.Menu):
 
 
 class QUICKT_MT_SmartModifiers(bpy.types.Menu):
-    bl_idname = "object.smart_mod"
+    bl_idname = "QUICKT_MT_SmartModifiers"
     bl_label = "Smart Modifiers"
 
     def draw(self, context):

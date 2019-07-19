@@ -36,7 +36,11 @@ class QT_OT_Focus(bpy.types.Operator):
 
     def execute(self, context):
         history = context.scene.quick_focus_history
-        
+        space_data = context.space_data
+        if space_data.type == 'VIEW_3D':
+            if space_data.local_view:  # just leave local view
+                bpy.ops.view3d.localview(frame_selected=False)
+
         sel = context.selected_objects if not self.hide_selected else list(set(context.visible_objects) - set(context.selected_objects))
         if sel:
             self.focus(context, sel, history)

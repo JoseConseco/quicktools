@@ -100,10 +100,6 @@ class QUICKT_OT_CutMeshInHalfAndMirror(bpy.types.Operator):
         return {'FINISHED'}
 
 
-###################################################
-# Set object origin to center of current mesh selection in edit mdoe
-###################################################
-
 class QUICKT_OT_setObjectOrigin(bpy.types.Operator):
     """Set Object Origin To Center Of Current Mesh Selection"""
     bl_idname = "mesh.origin_to_mesh_select"
@@ -124,8 +120,6 @@ class QUICKT_OT_setObjectOrigin(bpy.types.Operator):
 
 
 bpy.types.Scene.bevelWeight = bpy.props.FloatProperty(name="Bevel Weight", description="", default=1.0, min=0.0, max=1.0)
-
-
 class QUICKT_OT_setBevelWeight(bpy.types.Operator):
     bl_idname = "mesh.set_bevel_weight"
     bl_label = "Set Bevel Weight"
