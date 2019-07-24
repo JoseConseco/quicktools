@@ -112,10 +112,13 @@ class MESH_OT_GrowRing(bpy.types.Operator):
         me = obj.data
         bm = bmesh.from_edit_mesh(me)
         selected_edges = [e for e in bm.edges if e.select]
+        edges_to_select = []
         for e in selected_edges:
             for loop in e.link_loops:
-                loop.link_loop_next.link_loop_next.edge.select = True
-                loop.link_loop_prev.link_loop_prev.edge.select = True
+                if len(loop.face.edges) == 4:
+                    edges_to_select.append(loop.link_loop_next.link_loop_next.edge)
+        for e in edges_to_select:
+            e.select = True
         bmesh.update_edit_mesh(me, True)
         return {"FINISHED"}
 
