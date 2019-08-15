@@ -14,6 +14,7 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(quick_object)
+    importlib.reload(quick_mesh)
     importlib.reload(quick_select)
     importlib.reload(quick_shapekeys)
     importlib.reload(quick_focus)
@@ -22,6 +23,7 @@ if "bpy" in locals():
     importlib.reload(radial_instances)
 else:
     from . import quick_object
+    from . import quick_mesh
     from . import quick_select
     from . import quick_shapekeys
     from . import quick_focus
