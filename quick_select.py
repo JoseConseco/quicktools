@@ -55,7 +55,10 @@ class MESH_OT_GrowLoop(bpy.types.Operator):
                             break
                 elif len(vert.link_edges) == 2:
                     for other_edge  in other_not_selected_edges(vert, e):
-                        edges_to_select.append(other_edge)
+                        e_vec = vert.co - e.other_vert(vert).co #from A -> Vert
+                        other_e_vec = other_edge.other_vert(vert).co - vert.co # from vert  -> B
+                        if e_vec.dot(other_e_vec) < - 3.14 * (2/3):
+                            edges_to_select.append(other_edge)
 
                 elif len(vert.link_edges) == 3:
                     for other_edge in other_not_selected_edges(vert, e):

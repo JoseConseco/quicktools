@@ -13,6 +13,8 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
+    importlib.reload(general_utils)
+    importlib.reload(quick_file_ops)
     importlib.reload(quick_object)
     importlib.reload(quick_mesh)
     importlib.reload(quick_select)
@@ -21,7 +23,12 @@ if "bpy" in locals():
     importlib.reload(quick_armature)
     importlib.reload(quick_lattice)
     importlib.reload(radial_instances)
+    importlib.reload(quick_prefs)
+
 else:
+    from .utils import general_utils
+    from . import quick_file_ops
+    from . import quick_file_ops
     from . import quick_object
     from . import quick_mesh
     from . import quick_select
@@ -30,6 +37,7 @@ else:
     from . import quick_armature
     from . import quick_lattice
     from . import radial_instances
+    from . import quick_prefs
 
 import bpy
 
@@ -40,41 +48,18 @@ from . import auto_load
 
 auto_load.init()
 
-from .quick_focus import HistoryEpochCollection
 import traceback
-
-addon_keymaps = []
+from .quick_prefs import enable_focus, disable_focus
 def register():
     try:
         auto_load.register()
     except: traceback.print_exc()
-
-    wm = bpy.context.window_manager
-    kc = bpy.context.window_manager.keyconfigs.addon
-
-    km = kc.keymaps.new(name='3D View', space_type="VIEW_3D")
-    kmi1 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS')
-    kmi1.properties.hide_selected = False
-    addon_keymaps.append((km, kmi1))
-
-    kmi2 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS', alt=True)
-    kmi2.properties.hide_selected = True
-    addon_keymaps.append((km, kmi2))
-
-    bpy.types.Scene.quick_focus_history = bpy.props.CollectionProperty(type=HistoryEpochCollection)
+    enable_focus()
 
 def unregister():
     try:
         auto_load.unregister()
     except: traceback.print_exc()
     
-
     print("Unregistered {}".format(bl_info["name"]))
-    del bpy.types.Scene.quick_focus_history
-    # remove the add-on keymaps
-    for km, kmi in addon_keymaps:
-        # km.keymap_items.remove(kmi)
-        for kmi in km.keymap_items:
-            km.keymap_items.remove(kmi)
-    addon_keymaps.clear()
-
+    disable_focus()
