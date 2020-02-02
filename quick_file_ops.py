@@ -1,6 +1,37 @@
 import bpy
 import os
 
+
+def addons_list(self, context):
+    return [(name, name, name ) for name in sorted(context.preferences.addons.keys())]
+
+class QF_OT_ReloadScript(bpy.types.Operator):
+    bl_idname = "script.reload_my_addon"
+    bl_label = "reload script"
+    bl_description = "Reload addon by name"
+    bl_options = {"REGISTER"}
+
+    addon_name: bpy.props.EnumProperty(name='addon name', description='', items=addons_list)
+    # mod_name: bpy.props.StringProperty(name='mod name', description='', default='')
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context):
+        layout = self.layout
+        row = layout.row(align=True)
+        row.prop(self, 'addon_name')
+
+    def execute(self, context):
+        # import garment_tool
+        import importlib
+        mod = __import__(self.addon_name)
+        importlib.reload(mod)
+        bpy.ops.preferences.addon_enable(module=self.addon_name)
+        return {"FINISHED"}
+
+
+
 class BLEND_OT_DeleteBlend(bpy.types.Operator):
     bl_idname = "object.delete_blend_file"
     bl_label = "Delete Remove blend file"

@@ -17,7 +17,6 @@ if "bpy" in locals():
     importlib.reload(quick_file_ops)
     importlib.reload(quick_object)
     importlib.reload(quick_mesh)
-    importlib.reload(quick_select)
     importlib.reload(quick_shapekeys)
     importlib.reload(quick_focus)
     importlib.reload(quick_armature)
@@ -31,7 +30,6 @@ else:
     from . import quick_file_ops
     from . import quick_object
     from . import quick_mesh
-    from . import quick_select
     from . import quick_shapekeys
     from . import quick_focus
     from . import quick_armature

@@ -100,7 +100,7 @@ class QUICKT_OT_CutMeshInHalfAndMirror(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class QUICKT_OT_setObjectOrigin(bpy.types.Operator):
+class QUICKT_OT_SetObjectOrigin(bpy.types.Operator):
     """Set Object Origin To Center Of Current Mesh Selection"""
     bl_idname = "mesh.origin_to_mesh_select"
     bl_label = "Origin to mesh selection"
