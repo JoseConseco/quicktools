@@ -5,6 +5,7 @@ import os
 def addons_list(self, context):
     return [(name, name, name) for name in sorted(context.preferences.addons.keys())]
 
+
 class QF_OT_ReloadScript(bpy.types.Operator):
     bl_idname = "script.reload_my_addon"
     bl_label = "reload script"
@@ -27,6 +28,10 @@ class QF_OT_ReloadScript(bpy.types.Operator):
 
     def execute(self, context):
         # import garment_tool
+        if not self.addon_name:
+            self.report({'ERROR'}, f'Pick addon to reload!')
+            return {'CANCELLED'}
+            
         import importlib
         self.report({'INFO'}, f'Reloading: {self.addon_name}')
         
@@ -70,6 +75,52 @@ class BLEND_OT_DeleteBlend(bpy.types.Operator):
             os.remove(blend1)
             self.report({'INFO'}, f'Removed: {blend1}')
             
+        blend2 = current_blend+'2'
+        if os.path.isfile(blend2):
+            os.remove(blend2)
+            self.report({'INFO'}, f'Removed: {blend2}')
+
+        return {"FINISHED"}
+
+
+class BLEND_OT_RenameBlend(bpy.types.Operator):
+    bl_idname = "object.rename_blend"
+    bl_label = "Rename current blend file"
+    bl_description = "Rename current file from HDrive"
+    bl_options = {"REGISTER", "UNDO"}
+
+    name: bpy.props.StringProperty(name='name', description='', default='')
+
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text=f'Rename current file to:')
+        layout.prop(self, 'name')
+
+    def execute(self, context):
+        current_blend = bpy.data.filepath
+        current_dir = os.path.dirname(current_blend)
+        self.name = self.name + '.blend' if self.name[-6:] != '.blend' else self.name
+        if os.path.isfile(bpy.data.filepath):
+            new_name = os.path.join(current_dir, self.name)
+            # os.rename(current_blend,new_name)
+            os.remove(bpy.data.filepath)
+            bpy.ops.wm.save_as_mainfile(filepath=new_name, compress=True)
+            bpy.ops.wm.open_mainfile(filepath=new_name)
+            # bpy.data.filepath = new_name #! read only
+            self.report({'INFO'}, f'Renamed: {bpy.data.filepath}')
+        else:
+            self.report({'INFO'}, f'File: {bpy.data.filepath} does not exist! Cancelling')
+            return {'CANCELLED'}
+
+        blend1 = current_blend+'1'
+        if os.path.isfile(blend1):
+            os.remove(blend1)
+            self.report({'INFO'}, f'Removed: {blend1}')
+
         blend2 = current_blend+'2'
         if os.path.isfile(blend2):
             os.remove(blend2)

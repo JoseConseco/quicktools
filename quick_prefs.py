@@ -59,10 +59,12 @@ def enable_focus():
 
 
 def disable_focus():
-    del bpy.types.Scene.quick_focus_history
-    # remove the add-on keymaps
-    for km, kmi in addon_keymaps:
-        # km.keymap_items.remove(kmi)
-        for kmi in km.keymap_items:
-            km.keymap_items.remove(kmi)
-    addon_keymaps.clear()
+    prefs = get_addon_preferences()
+    if prefs.use_focus:
+        del bpy.types.Scene.quick_focus_history
+        # remove the add-on keymaps
+        for km, kmi in addon_keymaps:
+            # km.keymap_items.remove(kmi)
+            for kmi in km.keymap_items:
+                km.keymap_items.remove(kmi)
+        addon_keymaps.clear()
