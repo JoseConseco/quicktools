@@ -3,7 +3,7 @@ import os
 
 
 def addons_list(self, context):
-    return [(name, name, name ) for name in sorted(context.preferences.addons.keys())]
+    return [(name, name, name) for name in sorted(context.preferences.addons.keys())]
 
 class QF_OT_ReloadScript(bpy.types.Operator):
     bl_idname = "script.reload_my_addon"
@@ -12,25 +12,27 @@ class QF_OT_ReloadScript(bpy.types.Operator):
     bl_options = {"REGISTER"}
     bl_property = 'addon_name'
 
-    addon_name: bpy.props.EnumProperty(name='addon name', description='', items=addons_list)
-    # mod_name: bpy.props.StringProperty(name='mod name', description='', default='')
+    # addon_name: bpy.props.EnumProperty(name='addon name', description='', items=addons_list)
+    addon_name: bpy.props.StringProperty(name='mod name', description='', default='')
 
     def invoke(self, context, event):
         wm = context.window_manager
-        wm.invoke_search_popup(self)
-        return {'FINISHED'}
+        # wm.invoke_search_popup(self)
+        return context.window_manager.invoke_props_dialog(self)
+        # return {'FINISHED'}
 
     def draw(self, context):
         layout = self.layout
-        row = layout.row(align=True)
-        row.prop(self, 'addon_name')
+        layout.prop_search(self, 'addon_name', context.preferences, 'addons')
 
     def execute(self, context):
         # import garment_tool
         import importlib
+        self.report({'INFO'}, f'Reloading: {self.addon_name}')
+        
         mod = __import__(self.addon_name)
+        mod.unregister()
         importlib.reload(mod) #this unregisters but wont call reg?
-        mod.unregister() 
         mod.register() 
         bpy.ops.preferences.addon_enable(module=self.addon_name)
         return {"FINISHED"}
