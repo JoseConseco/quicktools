@@ -10,12 +10,15 @@ class QF_OT_ReloadScript(bpy.types.Operator):
     bl_label = "reload script"
     bl_description = "Reload addon by name"
     bl_options = {"REGISTER"}
+    bl_property = 'addon_name'
 
     addon_name: bpy.props.EnumProperty(name='addon name', description='', items=addons_list)
     # mod_name: bpy.props.StringProperty(name='mod name', description='', default='')
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self)
+        wm = context.window_manager
+        wm.invoke_search_popup(self)
+        return {'FINISHED'}
 
     def draw(self, context):
         layout = self.layout
@@ -26,7 +29,9 @@ class QF_OT_ReloadScript(bpy.types.Operator):
         # import garment_tool
         import importlib
         mod = __import__(self.addon_name)
-        importlib.reload(mod)
+        importlib.reload(mod) #this unregisters but wont call reg?
+        mod.unregister() 
+        mod.register() 
         bpy.ops.preferences.addon_enable(module=self.addon_name)
         return {"FINISHED"}
 
