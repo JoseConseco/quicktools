@@ -1,52 +1,9 @@
 import bpy
 import os
 
-
-def addons_list(self, context):
-    return [(name, name, name) for name in sorted(context.preferences.addons.keys())]
-
-
-class QF_OT_ReloadScript(bpy.types.Operator):
-    bl_idname = "script.reload_my_addon"
-    bl_label = "reload script"
-    bl_description = "Reload addon by name"
-    bl_options = {"REGISTER"}
-    bl_property = 'addon_name'
-
-    # addon_name: bpy.props.EnumProperty(name='addon name', description='', items=addons_list)
-    addon_name: bpy.props.StringProperty(name='mod name', description='', default='')
-
-    def invoke(self, context, event):
-        wm = context.window_manager
-        # wm.invoke_search_popup(self)
-        return context.window_manager.invoke_props_dialog(self)
-        # return {'FINISHED'}
-
-    def draw(self, context):
-        layout = self.layout
-        layout.prop_search(self, 'addon_name', context.preferences, 'addons')
-
-    def execute(self, context):
-        # import garment_tool
-        if not self.addon_name:
-            self.report({'ERROR'}, f'Pick addon to reload!')
-            return {'CANCELLED'}
-            
-        import importlib
-        self.report({'INFO'}, f'Reloading: {self.addon_name}')
-        
-        mod = __import__(self.addon_name)
-        mod.unregister()
-        importlib.reload(mod) #this unregisters but wont call reg?
-        mod.register() 
-        bpy.ops.preferences.addon_enable(module=self.addon_name)
-        return {"FINISHED"}
-
-
-
 class BLEND_OT_DeleteBlend(bpy.types.Operator):
     bl_idname = "object.delete_blend_file"
-    bl_label = "Delete Remove blend file"
+    bl_label = "Delete current blend file"
     bl_description = "Delete current blend file from HDrive"
     bl_options = {"REGISTER","UNDO"}
 

@@ -47,17 +47,18 @@ from . import auto_load
 auto_load.init()
 
 import traceback
-from .quick_prefs import enable_focus, disable_focus
 def register():
     try:
         auto_load.register()
     except: traceback.print_exc()
+    from .quick_prefs import enable_focus
     enable_focus()
 
 def unregister():
+    from .quick_prefs import disable_focus
+    disable_focus()
     try:
         auto_load.unregister()
     except: traceback.print_exc()
     
     print("Unregistered {}".format(bl_info["name"]))
-    disable_focus()

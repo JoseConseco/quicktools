@@ -3,7 +3,7 @@ from mathutils import Matrix, Vector, kdtree
 
 class QUICKT_OT_cloneShapekeyMask(bpy.types.Operator):
     """Toggle Double Sided Option"""
-    bl_label = "CloneShapekey"
+    bl_label = "Clone Shapekey"
     bl_idname = "object.clone_shapekey"
     bl_description = "Clone Shapekey"
 
@@ -48,7 +48,7 @@ class QUICKT_OT_mirrorShapekeyMask(bpy.types.Operator):
 
 
 class QUICKT_OT_applyShapekeyMask(bpy.types.Operator):
-    bl_label = "ApplyShapekeyMask"
+    bl_label = "Apply Shapekey Mask"
     bl_idname = "object.apply_shapekey_mask"
     bl_description = "Apply Shapekey Mask"
     bl_options = {"REGISTER", "UNDO"}
@@ -91,8 +91,18 @@ class QUICKT_OT_correctiveShapekey(bpy.types.Operator):
         activeShapeKey = context.active_object.active_shape_key
         baseShapeKey = obj.data.shape_keys.key_blocks[0]  # assuming basic shapekey is first always
         deltas = []
+        vertGroupName = activeShapeKey.vertex_group
+
+        vg = obj.vertex_groups.get(vertGroupName)
         for vert in obj.data.vertices:
-            deltas.append(activeShapeKey.data[vert.index].co-baseShapeKey.data[vert.index].co)
+            vertWeight = 1
+            if vg:
+                try:
+                    vertWeight = vg.weight(vert.index)
+                except:
+                    pass
+            deltas.append(vertWeight*(activeShapeKey.data[vert.index].co-baseShapeKey.data[vert.index].co))
+
         for shape in obj.data.shape_keys.key_blocks:
             if shape == activeShapeKey:  # skip active shape key = corrective shape
                 continue

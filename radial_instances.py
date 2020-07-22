@@ -9,19 +9,19 @@ class QUICKT_OT_RadialArrayModal(bpy.types.Operator):
     bl_label = "Radial Instances "
     bl_options = {'REGISTER', 'UNDO'}
 
-    numberOfClones: bpy.props.IntProperty(name="numberOfClones", description="", default=8, min=1, max=50)
+    numberOfClones: bpy.props.IntProperty(name="numberOfClones", description="", default=8, min=1, soft_max=50)
     axis: bpy.props.EnumProperty(name="Flip Axis", description="", default="Z",
                                   items=(("X", "X", ""),
                                          ("Y", "Y", ""),
                                          ("Z", "Z", "")
                                          ))
-    Radius: bpy.props.FloatProperty(name="Radius", description="", default=0.4, min=0.01, max=100)
+    Radius: bpy.props.FloatProperty(name="Radius", description="", default=0.4, min=0.01, soft_max=100)
     objList = []
     MatWorldBackup = None
 
-    Yaw: bpy.props.FloatProperty(default=0.0, name="X", unit='ROTATION')
-    Pitch: bpy.props.FloatProperty(default=0.0, name="Y", unit='ROTATION')
-    Roll: bpy.props.FloatProperty(default=0.0, name="Z", unit='ROTATION')
+    Yaw: bpy.props.FloatProperty(default=0.0, name="X", unit='ROTATION', step=10, precision=0)
+    Pitch: bpy.props.FloatProperty(default=0.0, name="Y", unit='ROTATION', step=10, precision=0)
+    Roll: bpy.props.FloatProperty(default=0.0, name="Z", unit='ROTATION', step=10, precision=0)
     scale: bpy.props.FloatProperty \
             (
             name="Scale",
