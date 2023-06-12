@@ -31,12 +31,29 @@ class BLEND_OT_DeleteBlend(bpy.types.Operator):
         if os.path.isfile(blend1):
             os.remove(blend1)
             self.report({'INFO'}, f'Removed: {blend1}')
-            
+
         blend2 = current_blend+'2'
         if os.path.isfile(blend2):
             os.remove(blend2)
             self.report({'INFO'}, f'Removed: {blend2}')
 
+        return {"FINISHED"}
+
+# copy blend file path to clipboard operator
+class BLEND_OT_CopyBlendPath(bpy.types.Operator):
+    bl_idname = "object.copy_blend_path"
+    bl_label = "Copy blend file path to clipboard"
+    bl_description = "Copy blend file path to clipboard"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        bpy.context.window_manager.clipboard = bpy.data.filepath
+        # use to system clipboard too
+        import subprocess
+        # for linux
+        subprocess.run(['xclip', '-selection', 'clipboard'], input=bpy.data.filepath.encode('utf-8'))
+
+        self.report({'INFO'}, f'Copied: {bpy.data.filepath}')
         return {"FINISHED"}
 
 
