@@ -16,12 +16,14 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
                                             items=(("VIEW_3D", "3D View", ""),
                                                     ("IMAGE_EDITOR", "Image Editor", ""),
                                                     ("NODE_EDITOR", "Geometry Nodes", ""),
+                                                    ("SHADER_EDITOR", "Shader Editor", ""),
                                                     # ("DOPESHEET_EDITOR", "Dope Sheet", ""),
                                                     # ("GRAPH_EDITOR", "Graph Editor", ""),
                                                     ("TEXT_EDITOR", "Text Editor", ""),
                                                     ("CONSOLE", "Console", ""),
                                                     ("INFO", "Info", ""),
                                                     ("OUTLINER", "Outliner", ""),
+
                                                     # ("PROPERTIES", "Properties", ""),
                                                     # ("FILE_BROWSER", "File Browser", ""),
                                                     # ("PREFERENCES", "Preferences", ""),
@@ -108,7 +110,7 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
             context.area.tag_redraw()
 
         if event.type in {"RIGHTMOUSE", "ESC"}:
-            return self.cancelled(context, event)
+            return self.cancelled(context)
 
         return {"RUNNING_MODAL"}
 
@@ -150,32 +152,32 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
         print(f'mouse_y_percent: {mouse_y_percent}')
         print(f'split: {split}')
 
+        old_area = context.area
         if split in ('RIGHT','LEFT'):
             bpy.ops.screen.area_split( direction='VERTICAL', factor=self.mouse_x/width) # 'INVOKE_DEFAULT',
-            if split == 'RIGHT':
-                context.area.type = self.new_area_type
-                if self.new_area_type == 'NODE_EDITOR':
-                    context.area.ui_type = 'GeometryNodeTree'
-            else:
-                context.screen.areas[-1].type = self.new_area_type
-                if self.new_area_type == 'NODE_EDITOR':
-                    context.screen.areas[-1].ui_type = 'GeometryNodeTree'
+            # if split == 'RIGHT':
+            #     old_area.type = self.new_area_type
+            #     if self.new_area_type == 'NODE_EDITOR':
+            #         old_area.ui_type = 'GeometryNodeTree'
+            # else:
+
 
         else:
             bpy.ops.screen.area_split( direction='HORIZONTAL', factor=self.mouse_y/height) #'INVOKE_DEFAULT',
-            if split == 'TOP':
-                context.area.type = self.new_area_type
-                if self.new_area_type == 'NODE_EDITOR':
-                    context.area.ui_type = 'GeometryNodeTree'
-            else:
-                context.screen.areas[-1].type = self.new_area_type
-                if self.new_area_type == 'NODE_EDITOR':
-                    context.screen.areas[-1].ui_type = 'GeometryNodeTree'
+
+        if self.new_area_type == 'NODE_EDITOR':
+            context.screen.areas[-1].type = 'NODE_EDITOR'
+            context.screen.areas[-1].ui_type = 'GeometryNodeTree'
+        elif self.new_area_type == 'SHADER_EDITOR':
+            context.screen.areas[-1].type = 'NODE_EDITOR'
+            context.screen.areas[-1].ui_type = 'ShaderNodeTree'
+        else:
+            context.screen.areas[-1].type = self.new_area_type
 
         bpy.types.SpaceView3D.draw_handler_remove(self._handle, "WINDOW")
         return {"FINISHED"}
 
-    def cancelled(self):
+    def cancelled(self, context):
         bpy.types.SpaceView3D.draw_handler_remove(self._handle, "WINDOW")
         return {"CANCELLED"}
 
@@ -198,5 +200,6 @@ class QUICKT_MT_SplitAreaPie(bpy.types.Menu):
         pie.operator("screen.split_area_pie", text="Text Editor").new_area_type = 'TEXT_EDITOR'
         pie.operator("screen.split_area_pie", text="Console").new_area_type = 'CONSOLE'
         pie.operator("screen.area_close", text="Close Area", icon='X')
+        pie.operator("screen.split_area_pie", text="Shader Editor").new_area_type = 'SHADER_EDITOR'
 
 
