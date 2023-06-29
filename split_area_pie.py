@@ -14,6 +14,7 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
 
     new_area_type: bpy.props.EnumProperty(name="New Area Type", description="", default="VIEW_3D",
                                             items=(("VIEW_3D", "3D View", ""),
+                                                    ("ASSET_BROWSER", "Asset Browser", ""),
                                                     ("IMAGE_EDITOR", "Image Editor", ""),
                                                     ("NODE_EDITOR", "Geometry Nodes", ""),
                                                     ("SHADER_EDITOR", "Shader Editor", ""),
@@ -177,6 +178,9 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
         elif self.new_area_type == 'UV_EDITOR':
             context.screen.areas[-1].type = 'IMAGE_EDITOR'
             context.screen.areas[-1].ui_type = 'UV'
+        elif self.new_area_type == 'ASSET_BROWSER':
+            context.screen.areas[-1].type = 'FILE_BROWSER'
+            context.screen.areas[-1].ui_type = 'ASSETS'
         else:
             context.screen.areas[-1].type = self.new_area_type
 
@@ -201,7 +205,8 @@ class QUICKT_MT_SplitAreaPie(bpy.types.Menu):
 
         layout.operator_context = "INVOKE_DEFAULT"
         pie = layout.menu_pie()
-        pie.operator("screen.split_area_pie", text='View 3D').new_area_type = 'VIEW_3D'
+        # pie.operator("screen.split_area_pie", text='View 3D').new_area_type = 'VIEW_3D'
+        pie.operator("screen.split_area_pie", text='Asset Browser').new_area_type = 'ASSET_BROWSER'
         pie.operator("screen.split_area_pie", text="Image Editor").new_area_type = 'IMAGE_EDITOR'
         pie.operator("screen.split_area_pie", text="Geometry Nodes").new_area_type = 'NODE_EDITOR'
         # pie.operator("screen.split_area_pie", text="VIEW_3D").new_area_type = 'DOPESHEET_EDITOR'
