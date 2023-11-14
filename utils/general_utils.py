@@ -234,7 +234,7 @@ def draw_text_line(lines):
                         line_height_h1, x0=LEFT_MARGIN-20, y0=current_line_pos)
 
 
-shader2d = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+shader2d = gpu.shader.from_builtin('UNIFORM_COLOR')
 
 
 def draw_background_box(width, height, x0, y0):
