@@ -3,7 +3,7 @@ from mathutils import Vector
 import gpu
 from gpu_extras.batch import batch_for_shader
 
-shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+shader = gpu.shader.from_builtin('UNIFORM_COLOR')
 indices = ( (0, 1, 2), (1, 3, 2))
 
 
