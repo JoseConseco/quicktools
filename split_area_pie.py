@@ -174,7 +174,7 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
             context.screen.areas[-1].ui_type = 'ShaderNodeTree'
         elif self.new_area_type == 'IMAGE_EDITOR':
             context.screen.areas[-1].type = 'IMAGE_EDITOR'
-            context.screen.areas[-1].ui_type = 'ShaderNodeTree'
+            context.screen.areas[-1].ui_type = 'IMAGE_EDITOR'
         elif self.new_area_type == 'UV_EDITOR':
             context.screen.areas[-1].type = 'IMAGE_EDITOR'
             context.screen.areas[-1].ui_type = 'UV'
