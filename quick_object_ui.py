@@ -33,18 +33,6 @@ class QUICKT_MT_QuickObjectTools(bpy.types.Menu):
 
 
 
-class QUICKT_MT_SetShapeKeys(bpy.types.Menu):
-    bl_idname = "QUICKT_MT_SetShapeKeys"
-    bl_label = "Quick Shape Keys"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("object.clone_shapekey")
-        layout.operator("object.mirror_shapekey")
-        layout.operator("object.apply_shapekey_mask")
-        layout.operator("object.corrective_shapekey")
-
-
 class QUICKT_MT_SmartModifiers(bpy.types.Menu):
     bl_idname = "QUICKT_MT_SmartModifiers"
     bl_label = "Smart Modifiers"

@@ -81,9 +81,9 @@ class QUICKT_OT_applyShapekeyMask(bpy.types.Operator):
 
 
 class QUICKT_OT_correctiveShapekey(bpy.types.Operator):
-    bl_label = "Corrective Shapekey"
+    bl_label = "Apply Corrective Shapekey"
     bl_idname = "object.corrective_shapekey"
-    bl_description = "Corrective Shapekey"
+    bl_description = "Add active shape-key as corrective delta to all other shape keys."
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
@@ -109,3 +109,52 @@ class QUICKT_OT_correctiveShapekey(bpy.types.Operator):
             for vert, delta in zip(obj.data.vertices, deltas):
                 shape.data[vert.index].co += delta
         return {"FINISHED"}
+
+# apply to base - apply active shape to base shape, without moving all other shape keys
+class QUICKT_OT_applyToBaseShapekey(bpy.types.Operator):
+    bl_label = "Apply Active Shapekey to Base"
+    bl_idname = "object.apply_to_base_shapekey"
+    bl_description = "Apply active shapekey to base (without moving all other shape keys)"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        obj = context.active_object
+        activeShapeKey = context.active_object.active_shape_key
+        baseShapeKey = obj.data.shape_keys.key_blocks[0]  # assuming basic shapekey is first always
+        deltas = []
+        vertGroupName = activeShapeKey.vertex_group
+
+        vg = obj.vertex_groups.get(vertGroupName)
+        for vert in obj.data.vertices:
+            vertWeight = 1
+            if vg:
+                try:
+                    vertWeight = vg.weight(vert.index)
+                except:
+                    pass
+            deltas.append(vertWeight*(activeShapeKey.data[vert.index].co-baseShapeKey.data[vert.index].co))
+
+        # apply delta to base, and negative delta to all other shape keys
+        for shape in obj.data.shape_keys.key_blocks:
+            if shape == activeShapeKey:
+                continue
+            elif shape == baseShapeKey:
+                for vert, delta in zip(obj.data.vertices, deltas):
+                    shape.data[vert.index].co += delta
+
+        return {"FINISHED"}
+
+
+
+class QUICKT_MT_SetShapeKeys(bpy.types.Menu):
+    bl_idname = "QUICKT_MT_SetShapeKeys"
+    bl_label = "Quick Shape Keys"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator("object.clone_shapekey")
+        layout.operator("object.mirror_shapekey")
+        layout.operator("object.apply_shapekey_mask")
+        layout.operator("object.corrective_shapekey")
+        layout.operator("object.apply_to_base_shapekey")
+
