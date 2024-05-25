@@ -17,11 +17,17 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
                                                     ("ASSET_BROWSER", "Asset Browser", ""),
                                                     ("IMAGE_EDITOR", "Image Editor", ""),
                                                     ("NODE_EDITOR", "Geometry Nodes", ""),
+                                                    ("SPREADSHEET", "Spreadsheet", ""),
                                                     ("SHADER_EDITOR", "Shader Editor", ""),
-                                                    # ("DOPESHEET_EDITOR", "Dope Sheet", ""),
-                                                    # ("GRAPH_EDITOR", "Graph Editor", ""),
+
+                                                    ("DOPESHEET_EDITOR", "Dope Sheet", ""),
+                                                    ("GRAPH_EDITOR", "Graph Editor", ""),
+                                                    ("TIMELINE", "Timeline", ""),
+                                                    ("NLA_EDITOR", "NLA Editor", ""),
+
                                                     ("TEXT_EDITOR", "Text Editor", ""),
                                                     ("CONSOLE", "Console", ""),
+
                                                     ("INFO", "Info", ""),
                                                     ("OUTLINER", "Outliner", ""),
 
@@ -181,6 +187,10 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
         elif self.new_area_type == 'ASSET_BROWSER':
             context.screen.areas[-1].type = 'FILE_BROWSER'
             context.screen.areas[-1].ui_type = 'ASSETS'
+        elif self.new_area_type == 'TIMELINE':
+            context.screen.areas[-1].type = 'DOPESHEET_EDITOR'
+            context.screen.areas[-1].ui_type = 'TIMELINE'
+
         else:
             context.screen.areas[-1].type = self.new_area_type
 
@@ -205,16 +215,48 @@ class QUICKT_MT_SplitAreaPie(bpy.types.Menu):
 
         layout.operator_context = "INVOKE_DEFAULT"
         pie = layout.menu_pie()
+        # the pie order is: Left, Right, Top, Bottom,
         # pie.operator("screen.split_area_pie", text='View 3D').new_area_type = 'VIEW_3D'
-        pie.operator("screen.split_area_pie", text='Asset Browser').new_area_type = 'ASSET_BROWSER'
-        pie.operator("screen.split_area_pie", text="Image Editor").new_area_type = 'IMAGE_EDITOR'
-        pie.operator("screen.split_area_pie", text="Geometry Nodes").new_area_type = 'NODE_EDITOR'
+        # LEFT,
+        pie.operator("screen.split_area_pie", text='Asset Browser', icon='ASSET_MANAGER').new_area_type = 'ASSET_BROWSER'
+
+        # RIGHT,
+        pie.operator("screen.split_area_pie", text="Image Editor", icon='IMAGE_DATA').new_area_type = 'IMAGE_EDITOR'
+
+        # Bottom,
+        box = pie.box()
+        col = box.column(align=True)
+        col.operator("screen.split_area_pie", text="Text Editor", icon='TEXT').new_area_type = 'TEXT_EDITOR'
+        col.operator("screen.split_area_pie", text="Console", icon='CONSOLE' ).new_area_type = 'CONSOLE'
         # pie.operator("screen.split_area_pie", text="VIEW_3D").new_area_type = 'DOPESHEET_EDITOR'
         # pie.operator("screen.split_area_pie", text="VIEW_3D").new_area_type = 'GRAPH_EDITOR'
-        pie.operator("screen.split_area_pie", text="Text Editor").new_area_type = 'TEXT_EDITOR'
-        pie.operator("screen.split_area_pie", text="Console").new_area_type = 'CONSOLE'
+
+        # Top,
+        box = pie.box()
+        col = box.column(align=True)
+        col.operator("screen.split_area_pie", text="Geometry Nodes", icon='GEOMETRY_NODES').new_area_type = 'NODE_EDITOR'
+        col.operator("screen.split_area_pie", text="Shader Editor", icon='NODE_MATERIAL').new_area_type = 'SHADER_EDITOR'
+
+        # Let Top
+        pie.operator("screen.split_area_pie", text="Spreadsheet", icon='SPREADSHEET').new_area_type = 'SPREADSHEET'
+
+        # right top
         pie.operator("screen.area_close", text="Close Area", icon='X')
-        pie.operator("screen.split_area_pie", text="Shader Editor").new_area_type = 'SHADER_EDITOR'
-        pie.operator("screen.split_area_pie", text="UV Edit").new_area_type = 'UV_EDITOR'
+
+        # left bottom
+        # pie.operator("screen.split_area_pie", text="Shader Editor").new_area_type = 'SHADER_EDITOR'
+        box = pie.box()
+        col = box.column(align=True)
+        #  draw animation editrs: timeline, nla editor, dopesheet editor, graph editor
+        col.operator("screen.split_area_pie", text="Timeline", icon='TIME' ).new_area_type = 'TIMELINE'
+        col.operator("screen.split_area_pie", text="Dope Sheet", icon='ACTION' ).new_area_type = 'DOPESHEET_EDITOR'
+        col.operator("screen.split_area_pie", text="Graph Editor", icon='GRAPH').new_area_type = 'GRAPH_EDITOR'
+        col.operator("screen.split_area_pie", text="NLA Editor", icon='NLA').new_area_type = 'NLA_EDITOR'
+
+        # right bottom
+        pie.operator("screen.split_area_pie", text="UV Edit", icon='UV').new_area_type = 'UV_EDITOR'
+
+
+
 
 
