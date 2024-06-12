@@ -52,6 +52,8 @@ class BLEND_OT_CopyBlendPath(bpy.types.Operator):
         import subprocess
         # for linux
         subprocess.run(['xclip', '-selection', 'clipboard'], input=bpy.data.filepath.encode('utf-8'))
+        # for wayland
+        subprocess.run(['wl-copy'], input=bpy.data.filepath.encode('utf-8'))
 
         self.report({'INFO'}, f'Copied: {bpy.data.filepath}')
         return {"FINISHED"}
