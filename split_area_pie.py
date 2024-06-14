@@ -144,16 +144,14 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
 
         print(f"{mouse_x_percent=}")
 
+        # remake split - to pick closest edge
         if abs(mouse_x_percent) > abs(mouse_y_percent):
-            if mouse_x_percent > 0:
+            if mouse_x_percent > 0.25:
                 split = 'RIGHT'
-            else:
+            elif mouse_x_percent < -0.25:
                 split = 'LEFT'
-        else:
-            if mouse_y_percent > 0:
-                split = 'TOP'
             else:
-                split = 'BOTTOM'
+                split = 'TOP'
 
         # print(f'mouse_x_percent: {mouse_x_percent}')
         # print(f'mouse_y_percent: {mouse_y_percent}')
