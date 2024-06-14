@@ -55,18 +55,21 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
         mouse_x_percent = mouse_x / width - 0.5 # remap (0,1) to (-0.5, 0.5)
         mouse_y_percent = mouse_y / height - 0.5 # remap (0,1) to (-0.5, 0.5)
 
+        dist = { 'LEFT': mouse_x, 'RIGHT': width - mouse_x, 'TOP': height - mouse_y, 'BOTTOM': mouse_y}
+
         line_points = []
         rect_points = [] #
-        if abs(mouse_x_percent) > abs(mouse_y_percent):
+        side = min(dist, key=dist.get)
+        if side in ('RIGHT','LEFT'):
             line_points = [(mouse_x, 0), (mouse_x, height)]
-            if mouse_x_percent > 0: # right
+            if side == 'RIGHT' : # right
                 rect_points = [(mouse_x, 0), (width, 0), (mouse_x, height), (width, height)]
             else: # left
                 rect_points = [(0, 0), (mouse_x, 0), (0, height), (mouse_x, height)]
 
         else:
             line_points = [(0, mouse_y), (width, mouse_y)]
-            if mouse_y_percent > 0: # top
+            if side == 'TOP': # top
                 rect_points = [(0, mouse_y), (width, mouse_y), (0, height), (width, height)]
             else: # bottom
                 rect_points = [(0, 0), (width, 0), (0, mouse_y), (width, mouse_y)]
@@ -139,19 +142,11 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
         mouse_vector = Vector((mouse_x, mouse_y))
 
         # get the mouse position as a percentage of the area's width and height
-        mouse_x_percent = mouse_x / width - 0.5 # remap (0,1) to (-0.5, 0.5)
-        mouse_y_percent = mouse_y / height - 0.5 # remap (0,1) to (-0.5, 0.5)
-
-        print(f"{mouse_x_percent=}")
 
         # remake split - to pick closest edge
-        if abs(mouse_x_percent) > abs(mouse_y_percent):
-            if mouse_x_percent > 0.25:
-                split = 'RIGHT'
-            elif mouse_x_percent < -0.25:
-                split = 'LEFT'
-            else:
-                split = 'TOP'
+        dist = { 'LEFT': mouse_x, 'RIGHT': width - mouse_x, 'TOP': height - mouse_y, 'BOTTOM': mouse_y}
+
+        split = min(dist, key=dist.get)
 
         # print(f'mouse_x_percent: {mouse_x_percent}')
         # print(f'mouse_y_percent: {mouse_y_percent}')
