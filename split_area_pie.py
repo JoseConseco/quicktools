@@ -51,29 +51,28 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
         mouse_x = self.mouse_x - area.x
         mouse_y = self.mouse_y - area.y
 
-        # get the mouse position as a percentage of the area's width and height
-        mouse_x_percent = mouse_x / width - 0.5 # remap (0,1) to (-0.5, 0.5)
-        mouse_y_percent = mouse_y / height - 0.5 # remap (0,1) to (-0.5, 0.5)
-
-        dist = { 'LEFT': mouse_x, 'RIGHT': width - mouse_x, 'TOP': height - mouse_y, 'BOTTOM': mouse_y}
+        # Calculate percentage from center for both directions
+        x_percent = abs(0.5 - mouse_x / width)
+        y_percent = abs(0.5 - mouse_y / height)
 
         line_points = []
-        rect_points = [] #
-        side = min(dist, key=dist.get)
-        if side in ('RIGHT','LEFT'):
+        rect_points = []
+
+        # Determine split direction based on which percentage is further from 50%
+        if x_percent > y_percent:
+            # Vertical split
             line_points = [(mouse_x, 0), (mouse_x, height)]
-            if side == 'RIGHT' : # right
+            if mouse_x > width / 2:
                 rect_points = [(mouse_x, 0), (width, 0), (mouse_x, height), (width, height)]
-            else: # left
+            else:
                 rect_points = [(0, 0), (mouse_x, 0), (0, height), (mouse_x, height)]
-
         else:
+            # Horizontal split
             line_points = [(0, mouse_y), (width, mouse_y)]
-            if side == 'TOP': # top
+            if mouse_y > height / 2:
                 rect_points = [(0, mouse_y), (width, mouse_y), (0, height), (width, height)]
-            else: # bottom
+            else:
                 rect_points = [(0, 0), (width, 0), (0, mouse_y), (width, mouse_y)]
-
 
         batch = batch_for_shader(shader, 'TRIS', {"pos": rect_points}, indices=indices)
         gpu.state.blend_set('ALPHA')
@@ -128,42 +127,23 @@ class QUICKT_OT_SplitAreaPie(bpy.types.Operator):
         # print(f"{self.mouse_x=}")
 
 
-        # get the area's center
-        center_x = width / 2
-        center_y = height / 2
-
-        # get the mouse position relative to the area's center
         mouse_x = self.mouse_x - area.x
         mouse_y = self.mouse_y - area.y
 
-        # print(f"{mouse_x=}")
+        # Calculate percentage from center for both directions
+        x_percent = abs(0.5 - mouse_x / width)
+        y_percent = abs(0.5 - mouse_y / height)
 
-        # get the mouse position as a vector
-        mouse_vector = Vector((mouse_x, mouse_y))
-
-        # get the mouse position as a percentage of the area's width and height
-
-        # remake split - to pick closest edge
-        dist = { 'LEFT': mouse_x, 'RIGHT': width - mouse_x, 'TOP': height - mouse_y, 'BOTTOM': mouse_y}
-
-        split = min(dist, key=dist.get)
-
-        # print(f'mouse_x_percent: {mouse_x_percent}')
-        # print(f'mouse_y_percent: {mouse_y_percent}')
-        # print(f'split: {split}')
-
-        # old_area = context.area
-        if split in ('RIGHT','LEFT'):
-            bpy.ops.screen.area_split( direction='VERTICAL', factor=mouse_x/width) # 'INVOKE_DEFAULT',
-            # if split == 'RIGHT':
-            #     old_area.type = self.new_area_type
-            #     if self.new_area_type == 'NODE_EDITOR':
-            #         old_area.ui_type = 'GeometryNodeTree'
-            # else:
-
-
+        # Determine split direction based on which percentage is further from 50%
+        if x_percent > y_percent:
+            direction = 'VERTICAL'
+            factor = mouse_x / width
         else:
-            bpy.ops.screen.area_split( direction='HORIZONTAL', factor=mouse_y/height) #'INVOKE_DEFAULT',
+            direction = 'HORIZONTAL'
+            factor = mouse_y / height
+
+        # Perform the split
+        bpy.ops.screen.area_split(direction=direction, factor=factor)
 
         if self.new_area_type == 'NODE_EDITOR':
             context.screen.areas[-1].type = 'NODE_EDITOR'
