@@ -151,3 +151,18 @@ class QUICKT_OT_setBevelWeight(bpy.types.Operator):
             bmesh.update_edit_mesh(mesh)
         return {"FINISHED"}
 
+# operator to disable all modifier - with option to skip armature modifier
+class QUICKT_OT_DisableAllModifiers(bpy.types.Operator):
+    """Disable all modifiers on the active object"""
+    bl_idname = "object.disable_all_modifiers"
+    bl_label = "Disable All Modifiers"
+    bl_options = {'REGISTER', 'UNDO'}
+    skipArmature: bpy.props.BoolProperty(name="Skip Armature", default=True)
+
+    def execute(self, context):
+        obj = context.active_object
+        for mod in obj.modifiers:
+            if self.skipArmature and mod.type == 'ARMATURE':
+                continue
+            mod.show_viewport = False
+        return {'FINISHED'}
