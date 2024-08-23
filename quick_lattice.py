@@ -29,20 +29,24 @@ def get_scale_mat(vec_scale):
     return mat_scale
 
 
-def set_lattice_transformation(selected_objs, use_modifiers):
+def set_lattice_transformation(context, selected_objs, use_modifiers):
     ''' return (center, sizex, sizey, sizez) '''
     patter_count = len(selected_objs)
     mode = bpy.context.active_object.mode
     bpy.ops.object.mode_set(mode='OBJECT')
+    dep = context.evaluated_depsgraph_get()
     if patter_count == 1:  # get local space cos we will align lattice to it anyway
+        dep = context.evaluated_depsgraph_get()
         if use_modifiers:
-            obj_data = selected_objs[0].to_mesh(bpy.context.depsgraph, apply_modifiers=True, calc_undeformed=False)
+            obj_data = selected_objs[0].to_mesh(preserve_all_data_layers=False, depsgraph=dep)
+            obj_eval = selected_objs[0].evaluated_get(dep)
+            obj_data = obj_eval.to_mesh()
         else:
             obj_data = selected_objs[0].data
         if mode == 'OBJECT':
             points = [vert.co for vert in obj_data.vertices]
         else:
-            points = [vert.co for vert in obj_data.vertices if vert.select] 
+            points = [vert.co for vert in obj_data.vertices if vert.select]
         if mode == 'EDIT' and len(points)>0:
             if 'QuickLatticeMask' in obj_data.vertex_groups.keys():
                 vg = obj_data.vertex_groups["QuickLatticeMask"]
@@ -53,11 +57,14 @@ def set_lattice_transformation(selected_objs, use_modifiers):
         points = []
         for obj in selected_objs:
             if use_modifiers:
-                obj_data = obj.to_mesh(bpy.context.depsgraph, apply_modifiers=True, calc_undeformed=False)
+                obj_data = obj.to_mesh(preserve_all_data_layers=False, depsgraph=dep)
+                obj_eval = obj.evaluated_get(dep)
+                obj_data = obj_eval.to_mesh()
             else:
                 obj_data = obj.data
+
             if mode == 'OBJECT':
-                verts_co = [obj.matrix_world@vert.co for vert in obj_data.vertices]  
+                verts_co = [obj.matrix_world@vert.co for vert in obj_data.vertices]
             else:
                 verts_co = [obj.matrix_world@vert.co for vert in obj_data.vertices if vert.select]
             points.extend(verts_co)
@@ -77,7 +84,7 @@ def set_lattice_transformation(selected_objs, use_modifiers):
     min_z = np.min(np_points[:, 2])
 
     # center = Vector((max_x+min_x, max_y+min_y, max_z+min_z)) * 0.5
-    vec_scale = Vector((max(max_x-min_x, 0.1), max(max_y-min_y, 0.1), max(max_z-min_z, 0.1))) 
+    vec_scale = Vector((max(max_x-min_x, 0.1), max(max_y-min_y, 0.1), max(max_z-min_z, 0.1)))
 
     mat_loc = Matrix.Translation(((max_x+min_x)/2, (max_y+min_y)/2, (max_z+min_z)/2))
     mat_sca = get_scale_mat(vec_scale)
@@ -100,7 +107,7 @@ def set_lattice(context, name, target_objs, use_modifiers):
     context.scene.collection.objects.link(lattice_ob)
 
     # lattice_ob.rotation_euler = align_obj.rotation_euler
-    new_mat_transform = set_lattice_transformation(target_objs, use_modifiers)
+    new_mat_transform = set_lattice_transformation(context, target_objs, use_modifiers)
     lattice_ob.matrix_world = new_mat_transform
     return lattice_ob
 
