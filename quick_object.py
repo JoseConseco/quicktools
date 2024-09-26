@@ -160,9 +160,26 @@ class QUICKT_OT_DisableAllModifiers(bpy.types.Operator):
     skipArmature: bpy.props.BoolProperty(name="Skip Armature", default=True)
 
     def execute(self, context):
-        obj = context.active_object
-        for mod in obj.modifiers:
-            if self.skipArmature and mod.type == 'ARMATURE':
-                continue
-            mod.show_viewport = False
+        for obj in context.selected_objects:
+            for mod in obj.modifiers:
+                if self.skipArmature and mod.type == 'ARMATURE':
+                    continue
+                mod.show_viewport = False
+        return {'FINISHED'}
+
+# operator to enable all modifier - with option to skip armature modifier
+
+class QUICKT_OT_EnableAllModifiers(bpy.types.Operator):
+    """Enable all modifiers on the active object"""
+    bl_idname = "object.enable_all_modifiers"
+    bl_label = "Enable All Modifiers"
+    bl_options = {'REGISTER', 'UNDO'}
+    skipArmature: bpy.props.BoolProperty(name="Skip Armature", default=True)
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            for mod in obj.modifiers:
+                if self.skipArmature and mod.type == 'ARMATURE':
+                    continue
+                mod.show_viewport = True
         return {'FINISHED'}
