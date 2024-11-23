@@ -132,16 +132,15 @@ def new_keymap_items(kc):
     new_keymaps = []
 
     km = kc.keymaps.new(name='3D View', space_type="VIEW_3D")
-    if not km:
-        km = kc.keymaps.new(name='3D View', space_type="VIEW_3D")
-    kmi1 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS')
-    kmi1.properties.hide_selected = False
-    new_keymaps.append((km, kmi1))
-
-    kmi2 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS', alt=True)
-    kmi2.properties.hide_selected = True
-    # kmi3.active = True
-    new_keymaps.append((km, kmi2))
+    # if not km:
+    #     km = kc.keymaps.new(name='3D View', space_type="VIEW_3D")
+    # kmi1 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS')
+    # kmi1.properties.hide_selected = False
+    # new_keymaps.append((km, kmi1))
+    #
+    # kmi2 = km.keymap_items.new('object.focus', 'NUMPAD_SLASH', 'PRESS', alt=True)
+    # kmi2.properties.hide_selected = True
+    # new_keymaps.append((km, kmi2))
 
     # add hoteky for 'QUICKT_MT_SplitAreaPie' pie menu (ctrl+shift+q)
 
