@@ -3,19 +3,11 @@ from bpy.props import (StringProperty, IntProperty, BoolProperty,
                       CollectionProperty, PointerProperty, EnumProperty,
                       FloatProperty)
 
-# COLLECTIONS
-class HistoryObjectsCollection(bpy.types.PropertyGroup):
-    obj: PointerProperty(
-        name="History Object",
-        type=bpy.types.Object,
-        description="Reference to the history object"
-    )
+class IsolatedObjects(bpy.types.PropertyGroup):
+    obj: PointerProperty( name="History Object", type=bpy.types.Object, description="Reference to the history object")
 
 class HistoryEpochCollection(bpy.types.PropertyGroup):
-    objects: CollectionProperty(
-        type=HistoryObjectsCollection,
-        description="Collection of hidden objects"
-    )
+    layer_objects: CollectionProperty(type=IsolatedObjects, description="Collection of hidden objects")
 
 class QT_OT_Focus(bpy.types.Operator):
     bl_idname = "object.focus"
@@ -57,12 +49,12 @@ class QT_OT_Focus(bpy.types.Operator):
             # Create new focus entry
             history_item = focus_history.add()
             focus_items = len(focus_history) - 1
-            print(f"Focus depth: {focus_items}")
+            # print(f"Focus depth: {focus_items}")
 
             # Batch hide objects
             for obj in hidden:
                 obj.hide_viewport = True
-                history_obj = history_item.objects.add()
+                history_obj = history_item.layer_objects.add()
                 history_obj.obj = obj
 
             # View selected objects
@@ -80,7 +72,7 @@ class QT_OT_Focus(bpy.types.Operator):
         last_item = focus_history[-1]
 
         # Restore hidden objects
-        for entry in last_item.objects:
+        for entry in last_item.layer_objects:
             if entry.obj:  # Check if object still exists
                 entry.obj.hide_viewport = False
                 if self.view_selected:
