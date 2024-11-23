@@ -1,23 +1,21 @@
 import bpy
-from bpy.props import StringProperty, IntProperty, BoolProperty, CollectionProperty, PointerProperty, EnumProperty, FloatProperty
-
+from bpy.props import (StringProperty, IntProperty, BoolProperty,
+                      CollectionProperty, PointerProperty, EnumProperty,
+                      FloatProperty)
 
 # COLLECTIONS
 class HistoryObjectsCollection(bpy.types.PropertyGroup):
-    name: StringProperty()
-    obj: PointerProperty(name="History Object", type=bpy.types.Object)
-
-
-class HistoryUnmirroredCollection(bpy.types.PropertyGroup):
-    name: StringProperty()
-    obj: PointerProperty(name="History Unmirror", type=bpy.types.Object)
-
+    obj: PointerProperty(
+        name="History Object",
+        type=bpy.types.Object,
+        description="Reference to the history object"
+    )
 
 class HistoryEpochCollection(bpy.types.PropertyGroup):
-    name: StringProperty()
-    objects: CollectionProperty(type=HistoryObjectsCollection)
-    unmirrored: CollectionProperty(type=HistoryUnmirroredCollection)
-
+    objects: CollectionProperty(
+        type=HistoryObjectsCollection,
+        description="Collection of hidden objects"
+    )
 
 class QT_OT_Focus(bpy.types.Operator):
     bl_idname = "object.focus"
@@ -25,110 +23,75 @@ class QT_OT_Focus(bpy.types.Operator):
     bl_description = "Hides objects with visibility queue"
     bl_options = {'REGISTER', 'UNDO'}
 
-    view_selected: BoolProperty(name="Zoom Selcted", default=False)
-    unmirror: BoolProperty(name="Un-Mirror", default=False)
-    hide_selected: BoolProperty(name="Hide Selected", default=False)
-
+    view_selected: BoolProperty( name="Zoom Selected", default=False, description="Zoom view to selected objects")
+    hide_selected: BoolProperty( name="Hide Selected", default=False, description="Hide selected objects instead of unselected")
 
     @classmethod
     def poll(cls, context):
-        return context.mode == "OBJECT"
+        return context.mode == "OBJECT" and context.space_data.type == 'VIEW_3D'
 
     def execute(self, context):
-        history = context.scene.quick_focus_history
         space_data = context.space_data
-        if space_data.type == 'VIEW_3D':
-            if space_data.local_view:  # just leave local view
-                bpy.ops.view3d.localview(frame_selected=False)
+        if space_data.local_view:
+            bpy.ops.view3d.localview(frame_selected=False)
 
-        sel = context.selected_objects if not self.hide_selected else list(set(context.visible_objects) - set(context.selected_objects))
+        # Cache selected objects to avoid multiple lookups
+        visible_objects = set(context.visible_objects)
+        selected_objects = set(context.selected_objects)
+
+        sel = (visible_objects - selected_objects) if self.hide_selected else selected_objects
+
         if sel:
-            self.focus(context, sel, history)
-        elif history:
-            self.unfocus(context, history)
+            self.focus(context, list(sel))
+        elif context.scene.quick_focus_history:
+            self.unfocus(context)
 
-        # for epoch in history:
-            # print(epoch.name, ", hidden: ", [obj.name for obj in epoch.objects], ", unmirrored: ", [obj.name for obj in epoch.unmirrored])
         return {'FINISHED'}
 
-    def focus(self, context, sel, history):
-        hidden = []
-
-        # hide objects not in the selection (and not already hidden)
-        for obj in context.visible_objects:
-            if obj not in sel:
-                hidden.append(obj)
-                obj.hide_viewport = True
-
-        # create new epoch, if objects were hidden
+    def focus(self, context, sel_objs):
+        focus_history = context.scene.quick_focus_history
+        visible_objects = set(context.visible_objects)
+        hidden = [obj for obj in visible_objects if obj not in sel_objs]
 
         if hidden:
-            epoch = history.add()
-            epoch.name = "Epoch %d" % (len(history) - 1)
+            # Create new focus entry
+            history_item = focus_history.add()
+            focus_items = len(focus_history) - 1
+            print(f"Focus depth: {focus_items}")
 
-            # store hidden objects
-
+            # Batch hide objects
             for obj in hidden:
-                entry = epoch.objects.add()
-                entry.obj = obj
-                entry.name = obj.name
+                obj.hide_viewport = True
+                history_obj = history_item.objects.add()
+                history_obj.obj = obj
 
-            # disable mirror mods and store these unmirrored objects
-
-            if self.unmirror:
-                for obj in sel:
-                    for mod in obj.modifiers:
-                        if mod.type == "MIRROR":
-                            if mod.show_viewport:
-                                mod.show_viewport = False
-
-                                entry = epoch.unmirrored.add()
-                                entry.obj = obj
-                                entry.name = obj.name
-
-            # view selected
-
-            if self.view_selected:
+            # View selected objects
+            if self.view_selected and sel_objs:
                 bpy.ops.view3d.view_selected()
-        else: #notihng to hide so assure we want to run unhide
-            self.unfocus(context, history)
+        else:
+            self.unfocus(context)
 
+    def unfocus(self, context):
+        focus_history = context.scene.quick_focus_history
+        if not focus_history:
+            return
 
-    def unfocus(self, context, history):
-        selected = []
-        # for view_selected, select visible objects
+        selected = set()
+        last_item = focus_history[-1]
 
-        if self.view_selected:
-            for obj in context.visible_objects:
-                obj.select_set(True)
-                selected.append(obj)
+        # Restore hidden objects
+        for entry in last_item.objects:
+            if entry.obj:  # Check if object still exists
+                entry.obj.hide_viewport = False
+                if self.view_selected:
+                    entry.obj.select_set(True)
+                    selected.add(entry.obj)
 
-        last_epoch = history[-1]
+        # Remove the last entry
+        focus_history.remove(len(focus_history) - 1)
 
-        # restore hidden objects and select them
-
-        for entry in last_epoch.objects:
-            entry.obj.hide_viewport = False
-            if self.view_selected:
-                entry.obj.select_set(True)
-                selected.append(entry.obj)
-
-        # re-enbable mirror mods
-        if self.unmirror:
-            for entry in last_epoch.unmirrored:
-                for mod in entry.obj.modifiers:
-                    if mod.type == "MIRROR":
-                        mod.show_viewport = True
-
-        # delete the last epoch
-
-        idx = history.keys().index(last_epoch.name)
-        history.remove(idx)
-
-        # view selected and deselect everythng
-
-        if self.view_selected:
+        # View selected and deselect everything
+        if self.view_selected and selected:
             bpy.ops.view3d.view_selected()
-
             for obj in selected:
                 obj.select_set(False)
