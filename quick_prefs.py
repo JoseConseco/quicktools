@@ -18,7 +18,7 @@
 
 import bpy
 # import rna_keymap_ui
-from .quick_focus import HistoryEpochCollection
+# from .quick_focus import HistoryEpochCollection
 from .utils.general_utils import get_addon_preferences
 import rna_keymap_ui
 
