@@ -53,13 +53,11 @@ def register():
     try:
         auto_load.register()
     except: traceback.print_exc()
-    from .quick_prefs import enable_focus, register_keymap
-    enable_focus()
+    from .quick_prefs import register_keymap
     register_keymap()
 
 def unregister():
-    from .quick_prefs import disable_focus, unregister_keymap
-    disable_focus()
+    from .quick_prefs import unregister_keymap
     unregister_keymap()
     try:
         auto_load.unregister()

@@ -26,12 +26,6 @@ import rna_keymap_ui
 
 
 class QuickToolPreferences(bpy.types.AddonPreferences):
-    def switch_focus(self, context):
-        if self.use_focus:
-            enable_focus()
-        else:
-            disable_focus()
-
     bl_idname = 'quicktools'
     use_focus: bpy.props.BoolProperty(name="Focus", description="Enable focus", default=False, update = switch_focus)
 
@@ -55,9 +49,6 @@ class QuickToolPreferences(bpy.types.AddonPreferences):
             return True
 
         layout = self.layout
-        row = layout.row(align=True)
-        row.prop(self, "use_focus")
-
         col = layout.column()
         col.label(text="Keymap List:",icon="KEYINGSET")
 
@@ -101,23 +92,6 @@ class QuickToolPreferences(bpy.types.AddonPreferences):
 
 
 addon_keymaps = []
-def enable_focus():
-    prefs = get_addon_preferences()
-    if prefs.use_focus:
-        bpy.types.Scene.quick_focus_history = bpy.props.CollectionProperty(type=HistoryEpochCollection)
-
-
-def disable_focus():
-    del bpy.types.Scene.quick_focus_history
-    prefs = get_addon_preferences()
-    # if prefs.use_focus:
-    #     # remove the add-on keymaps
-    #     for km, kmi in addon_keymaps:
-    #         # km.keymap_items.remove(kmi)
-    #         for kmi in km.keymap_items:
-    #             km.keymap_items.remove(kmi)
-    #     addon_keymaps.clear()
-
 
 
 def new_keymap_items(kc):
