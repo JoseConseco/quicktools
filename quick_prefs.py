@@ -18,7 +18,6 @@
 
 import bpy
 # import rna_keymap_ui
-# from .quick_focus import HistoryEpochCollection
 from .utils.general_utils import get_addon_preferences
 import rna_keymap_ui
 
@@ -27,8 +26,6 @@ import rna_keymap_ui
 
 class QuickToolPreferences(bpy.types.AddonPreferences):
     bl_idname = 'quicktools'
-    use_focus: bpy.props.BoolProperty(name="Focus", description="Enable focus", default=False, update = switch_focus)
-
 
     def draw_key_item(self, layout, description, kc, km, oper_bl_name, prop_name=None, prop_value=None):
         kmi = get_hotkey_entry_item(km, oper_bl_name, prop_name, prop_value)
@@ -124,8 +121,6 @@ def new_keymap_items(kc):
     kmi.properties.name = 'QUICKT_MT_SplitAreaPie'
     kmi.active = True
     new_keymaps.append((km, kmi))
-
-    bpy.types.Scene.quick_focus_history = bpy.props.CollectionProperty(type=HistoryEpochCollection)
 
     return new_keymaps
 
