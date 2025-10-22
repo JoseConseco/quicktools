@@ -19,7 +19,6 @@ Created by JOSECONSCO
 
 import bpy
 import gpu
-import bgl
 from math import sqrt
 from mathutils import Matrix, Vector
 from gpu_extras.batch import batch_for_shader
@@ -247,13 +246,13 @@ def draw_background_box(width, height, x0, y0):
         (x0, y0), (width, y0),
         (x0, height), (width, height))
     indices = ((0, 1, 2), (2, 1, 3))
-    bgl.glEnable(bgl.GL_BLEND)
+    gpu.state.blend_set(True)
     batch = batch_for_shader(shader2d, 'TRIS', {"pos": vertices}, indices=indices)
 
     shader2d.bind()
     shader2d.uniform_float("color", (0., 0., 0., 0.3))
     batch.draw(shader2d)
-    bgl.glDisable(bgl.GL_BLEND)
+    gpu.state.blend_set(False)
 
 
 def get_addon_name():

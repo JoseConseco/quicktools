@@ -1,7 +1,6 @@
 import numpy as np
 
 import bpy
-import bgl
 import bmesh
 from bpy import ops
 from bpy.props import BoolProperty, IntProperty

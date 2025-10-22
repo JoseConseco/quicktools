@@ -3,14 +3,14 @@ from copy import deepcopy
 from mathutils import Vector, Matrix
 from math import radians
 import blf
-from bgl import *
+  # bgl deprecated, use blf.color for text color
 
 
 def gui_update(self, context):
     font_id = 0
     blf.position(font_id, 50, 50, 0)
     blf.size(font_id, 15, 72)
-    glColor3f(1, 0.5, 0)
+    blf.color(font_id, 1.0, 0.5, 0.0, 1.0)  # RGBA
     blf.draw(font_id, "ARRAY MODE: Scroll add/remove instances | Mouse move - radius")
 
 

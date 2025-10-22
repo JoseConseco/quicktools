@@ -2,7 +2,7 @@ import bpy
 import blf
 from mathutils import Vector
 import math
-from bgl import *
+  # bgl deprecated, use blf.color for text color
 from bpy.props import IntProperty, FloatProperty
 from bpy_extras import view3d_utils
 
@@ -19,7 +19,7 @@ def gui_update(self,context):
     # draw some text
     blf.position(font_id, 50, 50, 0)
     blf.size(font_id, 15, 72)
-    glColor3f(1,0.5,0)
+    blf.color(font_id, 1.0, 0.5, 0.0, 1.0)  # RGBA
 
     # ouch
 
